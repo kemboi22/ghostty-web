@@ -329,17 +329,51 @@ export class SelectionManager {
   private copyToClipboard(text: string): void {
     if (!text) return;
     
-    if (navigator.clipboard) {
+    // Try modern Clipboard API first (requires secure context)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text)
         .then(() => {
-          console.log('✅ Copied to clipboard:', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
+          console.log('✅ Copied to clipboard (Clipboard API):', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
         })
         .catch(err => {
-          console.error('❌ Failed to copy to clipboard:', err);
-          console.log('💡 Note: Clipboard API requires HTTPS or localhost');
+          console.error('❌ Clipboard API failed:', err);
+          // Fall back to execCommand
+          this.copyToClipboardFallback(text);
         });
     } else {
-      console.warn('❌ Clipboard API not available (requires HTTPS or localhost)');
+      // Fallback to execCommand for non-secure contexts (like mux.coder)
+      console.log('💡 Using fallback copy method (Clipboard API requires HTTPS)');
+      this.copyToClipboardFallback(text);
+    }
+  }
+  
+  /**
+   * Fallback clipboard copy using execCommand (works in more contexts)
+   */
+  private copyToClipboardFallback(text: string): void {
+    try {
+      // Create a temporary textarea element
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      
+      // Select and copy the text
+      textarea.select();
+      textarea.setSelectionRange(0, text.length); // For mobile devices
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      
+      if (successful) {
+        console.log('✅ Copied to clipboard (fallback):', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
+      } else {
+        console.error('❌ Copy failed (both methods)');
+      }
+    } catch (err) {
+      console.error('❌ Fallback copy failed:', err);
     }
   }
   
