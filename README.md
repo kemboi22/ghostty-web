@@ -14,8 +14,6 @@ Or install from GitHub:
 npm install github:coder/ghostty-web
 ```
 
-**Note:** Git installs will auto-build during `postinstall` (requires Bun).
-
 ## Quick Start
 
 ```typescript
