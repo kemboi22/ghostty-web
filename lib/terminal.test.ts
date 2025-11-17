@@ -73,7 +73,7 @@ describe('Terminal', () => {
     });
 
     test('cannot write after disposal', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -83,7 +83,7 @@ describe('Terminal', () => {
     });
 
     test('cannot open twice', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -94,7 +94,7 @@ describe('Terminal', () => {
     });
 
     test('cannot open after disposal', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       term.dispose();
@@ -111,7 +111,7 @@ describe('Terminal', () => {
     });
 
     test('exposes element after open', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       expect(term.element).toBeUndefined();
@@ -149,7 +149,7 @@ describe('Terminal', () => {
     });
 
     test('onResize fires when terminal is resized', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal({ cols: 80, rows: 24 });
       await term.open(container);
@@ -169,7 +169,7 @@ describe('Terminal', () => {
     });
 
     test('onBell fires on bell character', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -192,7 +192,7 @@ describe('Terminal', () => {
 
   describe('Writing', () => {
     test('write() does not throw after open', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -203,7 +203,7 @@ describe('Terminal', () => {
     });
 
     test('write() accepts string', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -214,7 +214,7 @@ describe('Terminal', () => {
     });
 
     test('write() accepts Uint8Array', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -226,7 +226,7 @@ describe('Terminal', () => {
     });
 
     test('writeln() adds newline', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -239,7 +239,7 @@ describe('Terminal', () => {
 
   describe('Resizing', () => {
     test('resize() updates dimensions', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal({ cols: 80, rows: 24 });
       await term.open(container);
@@ -253,7 +253,7 @@ describe('Terminal', () => {
     });
 
     test('resize() with same dimensions is no-op', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal({ cols: 80, rows: 24 });
       await term.open(container);
@@ -276,7 +276,7 @@ describe('Terminal', () => {
 
   describe('Control Methods', () => {
     test('clear() does not throw', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -287,7 +287,7 @@ describe('Terminal', () => {
     });
 
     test('reset() does not throw', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -298,7 +298,7 @@ describe('Terminal', () => {
     });
 
     test('focus() does not throw', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -316,7 +316,7 @@ describe('Terminal', () => {
 
   describe('Addons', () => {
     test('loadAddon() accepts addon', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -336,7 +336,7 @@ describe('Terminal', () => {
     });
 
     test('loadAddon() calls activate', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -357,7 +357,7 @@ describe('Terminal', () => {
     });
 
     test('dispose() calls addon dispose', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -379,7 +379,7 @@ describe('Terminal', () => {
 
   describe('Integration', () => {
     test('can write ANSI sequences', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -393,7 +393,7 @@ describe('Terminal', () => {
     });
 
     test('can handle cursor movement sequences', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -406,7 +406,7 @@ describe('Terminal', () => {
     });
 
     test('multiple write calls work', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -423,7 +423,7 @@ describe('Terminal', () => {
 
   describe('Disposal', () => {
     test('dispose() can be called multiple times', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -433,7 +433,7 @@ describe('Terminal', () => {
     });
 
     test('dispose() cleans up canvas element', async () => {
-      if (!container) return; // Skip if no DOM
+      if (!container) throw new Error('DOM environment not available - check happydom setup');
 
       const term = new Terminal();
       await term.open(container);
@@ -1113,14 +1113,14 @@ describe('Buffer Access API', () => {
   });
 
   test('isAlternateScreen() starts false', async () => {
-    if (!container) return; // Skip if no DOM
+    if (!container) throw new Error('DOM environment not available - check happydom setup');
 
     await term.open(container);
     expect(term.wasmTerm?.isAlternateScreen()).toBe(false);
   });
 
   test('isAlternateScreen() detects alternate screen mode', async () => {
-    if (!container) return; // Skip if no DOM
+    if (!container) throw new Error('DOM environment not available - check happydom setup');
 
     await term.open(container);
 
@@ -1134,7 +1134,7 @@ describe('Buffer Access API', () => {
   });
 
   test('isRowWrapped() returns false for normal line breaks', async () => {
-    if (!container) return; // Skip if no DOM
+    if (!container) throw new Error('DOM environment not available - check happydom setup');
 
     await term.open(container);
     term.write('Line 1\r\nLine 2\r\n');
@@ -1144,7 +1144,8 @@ describe('Buffer Access API', () => {
   });
 
   test('isRowWrapped() detects wrapped lines', async () => {
-    if (typeof document === 'undefined') return; // Skip if no DOM
+    if (typeof document === 'undefined')
+      throw new Error('DOM environment not available - check happydom setup');
 
     // Create narrow terminal to force wrapping
     const narrowTerm = new Terminal({ cols: 20, rows: 10 });
@@ -1166,7 +1167,7 @@ describe('Buffer Access API', () => {
   });
 
   test('isRowWrapped() handles edge cases', async () => {
-    if (!container) return; // Skip if no DOM
+    if (!container) throw new Error('DOM environment not available - check happydom setup');
 
     await term.open(container);
 
@@ -1336,23 +1337,23 @@ describe('Selection with Scrollback', () => {
       term.write(`Line ${lineNum}: This is line number ${i}\r\n`);
     }
 
-    // At this point, the screen buffer shows lines 76-99 (last 24 lines)
-    // The scrollback buffer contains lines 0-75
+    // At this point, the screen buffer shows lines 77-99 (last 23 lines)
+    // The scrollback buffer contains lines 0-76 (77 lines total)
 
     // Scroll up 50 lines to view older content
     term.scrollLines(-50);
     expect(term.viewportY).toBe(50);
 
     // The viewport now shows:
-    // - Lines 0-23 of viewport = Lines 26-49 of the original output
-    // (because scrollback length is 76, viewportY is 50)
-    // Viewport line 0 = scrollback offset (76 - 50 + 0) = 26
+    // - Lines 0-23 of viewport = Lines 27-50 of the original output
+    // (because scrollback length is 77, viewportY is 50)
+    // Viewport line 0 = scrollback offset (77 - 50 + 0) = 27
 
     // Select from viewport row 5, col 0 to viewport row 7, col 20
     // This should select:
-    // - Viewport row 5 = Line 031 (scrollback offset 76-50+5 = 31)
-    // - Viewport row 6 = Line 032
-    // - Viewport row 7 = Line 033 (first 20 chars)
+    // - Viewport row 5 = Line 032 (scrollback offset 77-50+5 = 32)
+    // - Viewport row 6 = Line 033
+    // - Viewport row 7 = Line 034 (first 20 chars)
 
     // Use the internal selection manager to set selection
     if ((term as any).selectionManager) {
@@ -1362,10 +1363,10 @@ describe('Selection with Scrollback', () => {
 
       const selectedText = selMgr.getSelection();
 
-      // Should contain "Line 031", "Line 032", and start of "Line 033"
-      expect(selectedText).toContain('Line 031');
+      // Should contain "Line 032", "Line 033", and start of "Line 034"
       expect(selectedText).toContain('Line 032');
       expect(selectedText).toContain('Line 033');
+      expect(selectedText).toContain('Line 034');
 
       // Should NOT contain current screen buffer content (lines 76-99)
       expect(selectedText).not.toContain('Line 076');
@@ -1392,8 +1393,8 @@ describe('Selection with Scrollback', () => {
     expect(term.viewportY).toBe(10);
 
     // Now viewport shows:
-    // - Top 10 rows: scrollback content (lines 66-75)
-    // - Bottom 14 rows: screen buffer content (lines 76-89, 90-99 are below viewport)
+    // - Top 10 rows: scrollback content (lines 67-76)
+    // - Bottom 14 rows: screen buffer content (lines 77-90)
 
     // Select from row 8 (in scrollback) to row 12 (in screen buffer)
     if ((term as any).selectionManager) {
@@ -1403,14 +1404,14 @@ describe('Selection with Scrollback', () => {
 
       const selectedText = selMgr.getSelection();
 
-      // Row 8 is in scrollback (scrollback offset: 76-10+8 = 74)
-      // Rows 9 is in scrollback (offset 75)
-      // Rows 10-12 are in screen (screen rows 0-2, which are lines 76-78)
-      expect(selectedText).toContain('Line 074');
+      // Row 8 is in scrollback (scrollback offset: 77-10+8 = 75)
+      // Row 9 is in scrollback (offset 76)
+      // Rows 10-12 are in screen (screen rows 0-2, which are lines 77-79)
       expect(selectedText).toContain('Line 075');
       expect(selectedText).toContain('Line 076');
       expect(selectedText).toContain('Line 077');
       expect(selectedText).toContain('Line 078');
+      expect(selectedText).toContain('Line 079');
     }
 
     term.dispose();
@@ -1438,10 +1439,10 @@ describe('Selection with Scrollback', () => {
 
       const selectedText = selMgr.getSelection();
 
-      // Should get lines from screen buffer (lines 76-99 visible, we select first 3)
-      expect(selectedText).toContain('Line 076');
+      // Should get lines from screen buffer (lines 77-99 visible, we select first 3)
       expect(selectedText).toContain('Line 077');
       expect(selectedText).toContain('Line 078');
+      expect(selectedText).toContain('Line 079');
     }
 
     term.dispose();
