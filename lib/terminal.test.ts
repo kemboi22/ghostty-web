@@ -1425,6 +1425,48 @@ describe('Selection with Scrollback', () => {
     term.dispose();
   });
 
+  test('should select correct text with fractional viewportY (smooth scroll)', async () => {
+    if (!container) return;
+
+    const term = new Terminal({ cols: 80, rows: 24, scrollback: 1000 });
+    await term.open(container);
+
+    // Write 100 simple numbered lines
+    for (let i = 0; i < 100; i++) {
+      term.write(`Line ${i.toString().padStart(3, '0')}\r\n`);
+    }
+
+    // Simulate a fractional viewportY as produced by smooth scrolling.
+    // We set it directly to avoid needing to call private smooth scroll APIs.
+    (term as any).viewportY = 10.7;
+
+    // Sanity check that getViewportY returns the raw value
+    expect(term.getViewportY()).toBeCloseTo(10.7);
+
+    // SelectionManager interprets viewport rows using Math.floor(viewportY),
+    // matching CanvasRenderer. With viewportY=10.7, floor(viewportY)=10.
+    // At this point scrollbackLength is 77 (lines 0-76) and the screen shows 77-99.
+    // For viewport row 0:
+    //   scrollbackOffset = 77 - 10 + 0 = 67  => "Line 067"
+    // For viewport row 1:
+    //   scrollbackOffset = 77 - 10 + 1 = 68  => "Line 068"
+
+    if ((term as any).selectionManager) {
+      const selMgr = (term as any).selectionManager;
+      (selMgr as any).selectionStart = { col: 0, row: 0 };
+      (selMgr as any).selectionEnd = { col: 10, row: 1 };
+
+      const selectedText = selMgr.getSelection();
+
+      expect(selectedText).toContain('Line 067');
+      expect(selectedText).toContain('Line 068');
+      // Ensure we didn't accidentally select from the wrong region (e.g. current screen)
+      expect(selectedText).not.toContain('Line 077');
+      expect(selectedText).not.toContain('Line 078');
+    }
+
+    term.dispose();
+  });
   test('should handle selection in pure scrollback content', async () => {
     if (!container) return;
 

@@ -564,6 +564,16 @@ export class Terminal implements ITerminalCore {
   /**
    * Get selection position as buffer range
    */
+  /**
+   * Get the current viewport Y position.
+   *
+   * This is the number of lines scrolled back from the bottom of the
+   * scrollback buffer. It may be fractional during smooth scrolling.
+   */
+  public getViewportY(): number {
+    return this.viewportY;
+  }
+
   public getSelectionPosition(): IBufferRange | undefined {
     return this.selectionManager?.getSelectionPosition();
   }
@@ -1041,16 +1051,22 @@ export class Terminal implements ITerminalCore {
     let hyperlinkId = 0;
 
     // When scrolled, fetch from scrollback or screen based on position
+    // NOTE: viewportY may be fractional during smooth scrolling. The renderer
+    // uses Math.floor(viewportY) when mapping viewport rows to scrollback vs
+    // screen; we mirror that logic here so link hit-testing matches what the
+    // user sees on screen.
     let line: GhosttyCell[] | null = null;
-    if (this.viewportY > 0) {
+    const rawViewportY = this.getViewportY();
+    const viewportY = Math.max(0, Math.floor(rawViewportY));
+    if (viewportY > 0) {
       const scrollbackLength = this.wasmTerm.getScrollbackLength();
-      if (viewportRow < this.viewportY) {
+      if (viewportRow < viewportY) {
         // Mouse is over scrollback content
-        const scrollbackOffset = scrollbackLength - this.viewportY + viewportRow;
+        const scrollbackOffset = scrollbackLength - viewportY + viewportRow;
         line = this.wasmTerm.getScrollbackLine(scrollbackOffset);
       } else {
         // Mouse is over screen content (bottom part of viewport)
-        const screenRow = viewportRow - this.viewportY;
+        const screenRow = viewportRow - viewportY;
         line = this.wasmTerm.getLine(screenRow);
       }
     } else {
@@ -1077,14 +1093,18 @@ export class Terminal implements ITerminalCore {
     const scrollbackLength = this.wasmTerm.getScrollbackLength();
     let bufferRow: number;
 
-    if (this.viewportY > 0) {
+    // Use floored viewportY for buffer mapping (must match renderer & selection)
+    const rawViewportYForBuffer = this.getViewportY();
+    const viewportYForBuffer = Math.max(0, Math.floor(rawViewportYForBuffer));
+
+    if (viewportYForBuffer > 0) {
       // When scrolled, the buffer row depends on where in the viewport we are
-      if (viewportRow < this.viewportY) {
+      if (viewportRow < viewportYForBuffer) {
         // Mouse is over scrollback content
-        bufferRow = scrollbackLength - this.viewportY + viewportRow;
+        bufferRow = scrollbackLength - viewportYForBuffer + viewportRow;
       } else {
         // Mouse is over screen content (bottom part of viewport)
-        const screenRow = viewportRow - this.viewportY;
+        const screenRow = viewportRow - viewportYForBuffer;
         bufferRow = scrollbackLength + screenRow;
       }
     } else {
@@ -1119,8 +1139,11 @@ export class Terminal implements ITerminalCore {
               const scrollbackLength = this.wasmTerm?.getScrollbackLength() || 0;
 
               // Calculate viewport Y for start and end positions
-              const startViewportY = link.range.start.y - scrollbackLength + this.viewportY;
-              const endViewportY = link.range.end.y - scrollbackLength + this.viewportY;
+              // Use floored viewportY so overlay rows match renderer & selection
+              const rawViewportYForLinks = this.getViewportY();
+              const viewportYForLinks = Math.max(0, Math.floor(rawViewportYForLinks));
+              const startViewportY = link.range.start.y - scrollbackLength + viewportYForLinks;
+              const endViewportY = link.range.end.y - scrollbackLength + viewportYForLinks;
 
               // Only show underline if link is visible in viewport
               if (startViewportY < this.rows && endViewportY >= 0) {
@@ -1192,11 +1215,15 @@ export class Terminal implements ITerminalCore {
     const scrollbackLength = this.wasmTerm.getScrollbackLength();
     let bufferRow: number;
 
-    if (this.viewportY > 0) {
-      if (viewportRow < this.viewportY) {
-        bufferRow = scrollbackLength - this.viewportY + viewportRow;
+    // Use floored viewportY for buffer mapping (must match renderer & selection)
+    const rawViewportYForClick = this.getViewportY();
+    const viewportYForClick = Math.max(0, Math.floor(rawViewportYForClick));
+
+    if (viewportYForClick > 0) {
+      if (viewportRow < viewportYForClick) {
+        bufferRow = scrollbackLength - viewportYForClick + viewportRow;
       } else {
-        const screenRow = viewportRow - this.viewportY;
+        const screenRow = viewportRow - viewportYForClick;
         bufferRow = scrollbackLength + screenRow;
       }
     } else {

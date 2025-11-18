@@ -82,7 +82,15 @@ export class SelectionManager {
     const { startCol, startRow, endCol, endRow } = coords;
 
     // Get viewport state to handle scrollback correctly
-    const viewportY = (this.terminal as any).viewportY || 0;
+    // Note: viewportY can be fractional during smooth scrolling, but the renderer
+    // always uses Math.floor(viewportY) when mapping viewport rows to scrollback
+    // vs screen. We mirror that logic here so copied text matches the visual
+    // selection exactly.
+    const rawViewportY =
+      typeof (this.terminal as any).getViewportY === 'function'
+        ? (this.terminal as any).getViewportY()
+        : (this.terminal as any).viewportY || 0;
+    const viewportY = Math.max(0, Math.floor(rawViewportY));
     const scrollbackLength = this.wasmTerm.getScrollbackLength();
     let text = '';
 
