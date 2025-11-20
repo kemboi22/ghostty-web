@@ -195,7 +195,7 @@ const HTML_TEMPLATE = `<!doctype html>
         };
 
         ws.onmessage = (event) => {
-          console.log('Received data:', event.data.length, 'bytes');
+          console.log('Received data:', event.data.length, 'bytes:', JSON.stringify(event.data.slice(0, 100)));
           term.write(event.data);
         };
 
@@ -496,6 +496,10 @@ const server = http.createServer((req, res) => {
     '/ghostty-vt.wasm': {
       file: path.join(packageRoot, 'ghostty-vt.wasm'),
       type: 'application/wasm',
+    },
+    '/__vite-browser-external-2447137e.js': {
+      file: path.join(packageRoot, 'dist', '__vite-browser-external-2447137e.js'),
+      type: 'application/javascript',
     },
   };
 
