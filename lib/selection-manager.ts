@@ -40,6 +40,7 @@ export class SelectionManager {
   private selectionStart: { col: number; row: number } | null = null;
   private selectionEnd: { col: number; row: number } | null = null;
   private isSelecting: boolean = false;
+  private selectingStartTime: number = 0; // Track when selection started
   
   // Track previous selection for clearing
   private previousSelection: SelectionCoordinates | null = null;
@@ -49,6 +50,9 @@ export class SelectionManager {
   
   // Store bound event handlers for cleanup
   private boundMouseUpHandler: ((e: MouseEvent) => void) | null = null;
+  
+  // Safety timeout - if selecting for more than 30 seconds, something is wrong
+  private readonly MAX_SELECTION_TIME_MS = 30000;
   
   constructor(
     terminal: Terminal,
@@ -225,6 +229,7 @@ export class SelectionManager {
         this.selectionStart = cell;
         this.selectionEnd = cell;
         this.isSelecting = true;
+        this.selectingStartTime = Date.now();
         console.log('[Selection] ✅ isSelecting = true');
       }
     });
@@ -232,6 +237,14 @@ export class SelectionManager {
     // Mouse move - update selection
     canvas.addEventListener('mousemove', (e: MouseEvent) => {
       if (this.isSelecting) {
+        // Safety check: if we've been selecting for too long, force stop
+        const elapsed = Date.now() - this.selectingStartTime;
+        if (elapsed > this.MAX_SELECTION_TIME_MS) {
+          console.error('[Selection] ⚠️  Selection stuck for', elapsed, 'ms - force stopping');
+          this.isSelecting = false;
+          return;
+        }
+        
         const cell = this.pixelToCell(e.offsetX, e.offsetY);
         this.selectionEnd = cell;
         this.requestRender();
@@ -252,13 +265,21 @@ export class SelectionManager {
     this.boundMouseUpHandler = (e: MouseEvent) => {
       if (this.isSelecting) {
         console.log('[Selection] 🖱️  mouseup - stopping selection');
+        
+        // CRITICAL: Clear isSelecting FIRST, before any async operations
+        // This ensures we never get stuck in selecting mode, even if clipboard fails
         this.isSelecting = false;
         console.log('[Selection] ✅ isSelecting = false');
         
-        const text = this.getSelection();
-        if (text) {
-          this.copyToClipboard(text);
-          this.selectionChangedEmitter.fire();
+        try {
+          const text = this.getSelection();
+          if (text) {
+            this.copyToClipboard(text);
+            this.selectionChangedEmitter.fire();
+          }
+        } catch (err) {
+          console.error('[Selection] ❌ Error in mouseup handler:', err);
+          // isSelecting is already false, so we won't get stuck
         }
       }
     };
@@ -266,6 +287,11 @@ export class SelectionManager {
     
     // Double-click - select word
     canvas.addEventListener('dblclick', (e: MouseEvent) => {
+      console.log('[Selection] 🖱️  double-click - selecting word');
+      
+      // CRITICAL: Stop any active dragging first
+      this.isSelecting = false;
+      
       const cell = this.pixelToCell(e.offsetX, e.offsetY);
       const word = this.getWordAtCell(cell.col, cell.row);
       
@@ -280,6 +306,8 @@ export class SelectionManager {
           this.selectionChangedEmitter.fire();
         }
       }
+      
+      console.log('[Selection] ✅ isSelecting = false (after dblclick)');
     });
     
     // Right-click (context menu) - copy selection if exists
