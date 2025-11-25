@@ -21,6 +21,39 @@ async function openAndWaitForReady(term: Terminal, container: HTMLElement): Prom
   await new Promise<void>((resolve) => term.onReady(resolve));
 }
 
+/**
+ * Helper to convert viewport row to absolute buffer row for selection tests.
+ * Absolute row = scrollbackLength + viewportRow - viewportY
+ */
+function viewportRowToAbsolute(term: Terminal, viewportRow: number): number {
+  const scrollbackLength = term.wasmTerm?.getScrollbackLength() ?? 0;
+  const viewportY = Math.floor(term.getViewportY());
+  return scrollbackLength + viewportRow - viewportY;
+}
+
+/**
+ * Helper to set selection using viewport-relative rows (converts to absolute internally)
+ */
+function setSelectionViewportRelative(
+  term: Terminal,
+  startCol: number,
+  startViewportRow: number,
+  endCol: number,
+  endViewportRow: number
+): void {
+  const selMgr = (term as any).selectionManager;
+  if (selMgr) {
+    (selMgr as any).selectionStart = {
+      col: startCol,
+      absoluteRow: viewportRowToAbsolute(term, startViewportRow),
+    };
+    (selMgr as any).selectionEnd = {
+      col: endCol,
+      absoluteRow: viewportRowToAbsolute(term, endViewportRow),
+    };
+  }
+}
+
 describe('Terminal', () => {
   let container: HTMLElement | null = null;
 
@@ -1344,11 +1377,11 @@ describe('Selection with Scrollback', () => {
     // - Viewport row 7 = Line 034 (first 20 chars)
 
     // Use the internal selection manager to set selection
-    if ((term as any).selectionManager) {
-      const selMgr = (term as any).selectionManager;
-      (selMgr as any).selectionStart = { col: 0, row: 5 };
-      (selMgr as any).selectionEnd = { col: 20, row: 7 };
+    // Using helper to convert viewport rows to absolute coordinates
+    setSelectionViewportRelative(term, 0, 5, 20, 7);
 
+    const selMgr = (term as any).selectionManager;
+    if (selMgr) {
       const selectedText = selMgr.getSelection();
 
       // Should contain "Line 032", "Line 033", and start of "Line 034"
@@ -1385,11 +1418,11 @@ describe('Selection with Scrollback', () => {
     // - Bottom 14 rows: screen buffer content (lines 77-90)
 
     // Select from row 8 (in scrollback) to row 12 (in screen buffer)
-    if ((term as any).selectionManager) {
-      const selMgr = (term as any).selectionManager;
-      (selMgr as any).selectionStart = { col: 0, row: 8 };
-      (selMgr as any).selectionEnd = { col: 10, row: 12 };
+    // Using helper to convert viewport rows to absolute coordinates
+    setSelectionViewportRelative(term, 0, 8, 10, 12);
 
+    const selMgr = (term as any).selectionManager;
+    if (selMgr) {
       const selectedText = selMgr.getSelection();
 
       // Row 8 is in scrollback (scrollback offset: 77-10+8 = 75)
@@ -1420,11 +1453,11 @@ describe('Selection with Scrollback', () => {
     expect(term.viewportY).toBe(0);
 
     // Select from screen buffer (last visible lines)
-    if ((term as any).selectionManager) {
-      const selMgr = (term as any).selectionManager;
-      (selMgr as any).selectionStart = { col: 0, row: 0 };
-      (selMgr as any).selectionEnd = { col: 10, row: 2 };
+    // Using helper to convert viewport rows to absolute coordinates
+    setSelectionViewportRelative(term, 0, 0, 10, 2);
 
+    const selMgr = (term as any).selectionManager;
+    if (selMgr) {
       const selectedText = selMgr.getSelection();
 
       // Should get lines from screen buffer (lines 77-99 visible, we select first 3)
@@ -1462,11 +1495,11 @@ describe('Selection with Scrollback', () => {
     // For viewport row 1:
     //   scrollbackOffset = 77 - 10 + 1 = 68  => "Line 068"
 
-    if ((term as any).selectionManager) {
-      const selMgr = (term as any).selectionManager;
-      (selMgr as any).selectionStart = { col: 0, row: 0 };
-      (selMgr as any).selectionEnd = { col: 10, row: 1 };
+    // Using helper to convert viewport rows to absolute coordinates
+    setSelectionViewportRelative(term, 0, 0, 10, 1);
 
+    const selMgr = (term as any).selectionManager;
+    if (selMgr) {
       const selectedText = selMgr.getSelection();
 
       expect(selectedText).toContain('Line 067');
@@ -1497,11 +1530,11 @@ describe('Selection with Scrollback', () => {
     expect(viewportY).toBeGreaterThan(0);
 
     // Select first few lines (all in scrollback)
-    if ((term as any).selectionManager) {
-      const selMgr = (term as any).selectionManager;
-      (selMgr as any).selectionStart = { col: 0, row: 0 };
-      (selMgr as any).selectionEnd = { col: 20, row: 2 };
+    // Using helper to convert viewport rows to absolute coordinates
+    setSelectionViewportRelative(term, 0, 0, 20, 2);
 
+    const selMgr = (term as any).selectionManager;
+    if (selMgr) {
       const selectedText = selMgr.getSelection();
 
       // Should get the oldest scrollback lines
