@@ -12,11 +12,15 @@ Originally created for [Mux](https://github.com/coder/mux) (a desktop app for is
 
 ## Try It
 
-```bash
-npx @ghostty-web/demo@next
-```
+- [Live Demo](https://ghostty.ondis.co) on an ephemeral VM (thank you to Greg from [disco.cloud](https://disco.cloud) for hosting).
 
-This starts a local HTTP server with a real shell on `http://localhost:8080`. Works best on Linux and macOS.
+- On your computer:
+
+  ```bash
+  npx @ghostty-web/demo@next
+  ```
+
+  This starts a local HTTP server with a real shell on `http://localhost:8080`. Works best on Linux and macOS.
 
 ![ghostty](https://github.com/user-attachments/assets/aceee7eb-d57b-4d89-ac3d-ee1885d0187a)
 
